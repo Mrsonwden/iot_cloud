@@ -19,6 +19,7 @@
 
 #include "esp_log.h"
 #include "mqtt_client.h"
+#include "mqtt_topic.h"
 
 static const char *TAG = "MQTT_EXAMPLE";
 
@@ -34,17 +35,21 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event)
     switch (event->event_id) {
         case MQTT_EVENT_CONNECTED:
             ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
-            msg_id = esp_mqtt_client_publish(client, "/topic/qos1", "data_3", 0, 1, 0);
-            ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
+            ucas_mqtt_pub(client, ucas_base_pub_topic[0], "hello_world, I am esp32, the topic 0;" ,0,MQTT_QUALITY_0);
+            ucas_mqtt_pub(client, ucas_base_pub_topic[1], "hello_world, I am esp32, the topic 1;" ,0,MQTT_QUALITY_0);
 
-            msg_id = esp_mqtt_client_subscribe(client, "/topic/qos0", 0);
-            ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
+            // msg_id = esp_mqtt_client_publish(client, "/topic/qos1", "data_3", 0, 1, 0);
+            // ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
 
-            msg_id = esp_mqtt_client_subscribe(client, "/topic/qos1", 1);
-            ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
+            // msg_id = esp_mqtt_client_subscribe(client, "/topic/qos0", 0);
+            // ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
+            // msg_id = esp_mqtt_client_subscribe(client, "/topic/qos1", 1);
+            // ESP_LOGI(TAG, "sent subscribe successful, msg_id=%d", msg_id);
 
-            msg_id = esp_mqtt_client_unsubscribe(client, "/topic/qos1");
-            ESP_LOGI(TAG, "sent unsubscribe successful, msg_id=%d", msg_id);
+            // msg_id = esp_mqtt_client_unsubscribe(client, "/topic/qos1");
+            // ESP_LOGI(TAG, "sent unsubscribe successful, msg_id=%d", msg_id);
+
+            ucas_mqtt_sub(client, ucas_base_sub_topic, MAX_SUB_TOPIC,MQTT_QUALITY_0);
             break;
         case MQTT_EVENT_DISCONNECTED:
             ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
@@ -121,8 +126,11 @@ static void wifi_init(void)
 static void mqtt_app_start(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {
-        .uri = CONFIG_BROKER_URL,
+        //**.uri = CONFIG_BROKER_URL,
         .event_handle = mqtt_event_handler,
+        .host = "192.168.43.51",
+        .port = 1883,
+        .transport = MQTT_TRANSPORT_OVER_TCP
         // .user_context = (void *)your_context
     };
 
